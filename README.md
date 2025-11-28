@@ -120,20 +120,24 @@ website/
 ### 2. Bootstrap CDK (First Time Only)
 
 ```bash
-cdk bootstrap aws://ACCOUNT_ID/us-east-1 
+cdk bootstrap aws://ACCOUNT_ID/us-east-1 --profile abc
 ```
 
 ### 3. Deploy the Stack
 
 ```bash
+# Using default AWS credentials
 npm run deploy
+
+# Using a specific AWS profile
+npm run deploy -- --profile abc
 ```
 
 Or manually:
 
 ```bash
 npm run build
-cdk deploy
+cdk deploy --profile abc
 ```
 
 ### 4. Configure Domain Name Servers (Manual Step)
@@ -167,19 +171,62 @@ DNS propagation can take up to 48 hours. The ACM certificate will auto-validate 
 
 ## Updating Website Content
 
+### Via CLI Command (Recommended)
+
+The package provides a CLI command for uploading website content:
+
+```bash
+# Using npx (after npm install)
+npx upload-website --domain example.com --profile abc
+
+# Using npm script (in this repo)
+npm run upload -- --domain example.com --profile abc
+
+# With custom website folder
+npx upload-website --domain example.com --profile abc --path ./dist
+```
+
+**CLI Options:**
+
+| Option | Alias | Required | Description |
+|--------|-------|----------|-------------|
+| `--domain` | `-d` | Yes | Domain name (used to generate bucket name) |
+| `--profile` | `-p` | No | AWS profile name (uses default credentials if not specified) |
+| `--path` | `-w` | No | Path to website folder (default: `website`) |
+| `--help` | `-h` | No | Show help message |
+
+The CLI automatically:
+- Generates the correct S3 bucket name from domain
+- Syncs files with proper content-type headers
+- Finds and invalidates all associated CloudFront distributions
+
+### Via Programmatic API
+
+```typescript
+import { deployWebsite, getWebsiteBucketName } from "@prosoftsolutions/platform-infra";
+
+const bucketName = getWebsiteBucketName("example.com"); // Returns: "example-com-website"
+
+await deployWebsite({
+  bucketName,
+  profile: "abc",        // Optional: AWS profile
+  websitePath: "./dist", // Optional: defaults to "website"
+});
+```
+
 ### Via Redeployment
 
 Update files in `website/` and redeploy:
 
 ```bash
-npm run deploy
+npm run deploy -- --profile abc
 ```
 
-### Via AWS CLI
+### Via AWS CLI (Manual)
 
 ```bash
-aws s3 sync ./website s3://BUCKET_NAME --profile pss
-aws cloudfront create-invalidation --distribution-id DISTRIBUTION_ID --paths "/*" --profile pss
+aws s3 sync ./website s3://BUCKET_NAME --profile abc
+aws cloudfront create-invalidation --distribution-id DISTRIBUTION_ID --paths "/*" --profile abc
 ```
 
 ## Cache Invalidation
@@ -190,7 +237,7 @@ To force CloudFront to fetch fresh content:
 aws cloudfront create-invalidation \
   --distribution-id YOUR_DISTRIBUTION_ID \
   --paths "/*" \
-  --profile pss
+  --profile abc
 ```
 
 ## Troubleshooting
@@ -205,7 +252,7 @@ aws cloudfront create-invalidation \
 
 1. Check CloudFront domain first (works without DNS): `https://dxxxxxxxxx.cloudfront.net`
 2. Verify DNS resolution: `dig yourdomain.com`
-3. Check S3 bucket has content: `aws s3 ls s3://BUCKET_NAME --profile pss`
+3. Check S3 bucket has content: `aws s3 ls s3://BUCKET_NAME --profile abc`
 
 ### 403 Forbidden Errors
 
@@ -218,15 +265,29 @@ aws cloudfront create-invalidation \
 ```
 platform-infra/
 ├── src/
-│   ├── index.ts          # Main entry point and BuildStack helper
-│   ├── platform-stack.ts # CDK Stack definition
-│   └── types.ts          # TypeScript interfaces
-├── website/              # Static website content (create this)
-├── dist/                 # Compiled output
-├── cdk.json              # CDK configuration
+│   ├── index.ts              # Main entry point and exports
+│   ├── platform-stack.ts     # CDK Stack definition
+│   ├── deploy-website.ts     # S3 sync and CloudFront invalidation
+│   ├── website-bucket-name.ts # Bucket name generator
+│   ├── types.ts              # TypeScript interfaces
+│   └── cli/
+│       └── upload-website.ts # CLI command for website upload
+├── website/                  # Static website content (create this)
+├── dist/                     # Compiled output
+├── cdk.json                  # CDK configuration
 ├── package.json
 └── tsconfig.json
 ```
+
+## Exported Functions
+
+| Export | Description |
+|--------|-------------|
+| `PlatformStack` | CDK Stack class for infrastructure deployment |
+| `BuildStack` | Helper function to create CDK app with stack |
+| `deployWebsite` | Sync website to S3 and invalidate CloudFront |
+| `getWebsiteBucketName` | Generate S3 bucket name from domain |
+| `DeployWebsiteOptions` | TypeScript interface for deployWebsite options |
 
 ## Cost Considerations
 
