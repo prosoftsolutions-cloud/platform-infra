@@ -4,7 +4,7 @@ AWS CDK infrastructure package for deploying static websites with CloudFront, S3
 
 ## Architecture
 
-![Architecture Diagram](generated-diagrams/architecture.png)
+![Architecture Diagram](https://raw.githubusercontent.com/prosoftsolutions-cloud/platform-infra/master/generated-diagrams/architecture.png)
 
 The infrastructure creates a fully managed static website hosting solution:
 
