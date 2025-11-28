@@ -1,6 +1,6 @@
 {
   "name": "@prosoftsolutions/platform-infra",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AWS CDK infrastructure components for platform deployment",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
