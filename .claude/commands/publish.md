@@ -14,15 +14,19 @@ Publish the @prosoftsolutions/platform-infra package to npm.
    - major (1.1.3 -> 2.0.0) - breaking changes
    - none - skip version bump
 
-3. **Git operations**:
+3. **Update Documentation**:
+    - Update README.md to reflect current package details
+    - Regenerate diagrams 
+ 
+4. **Git operations**:
    - Stage all changes
    - Commit with message: "v{version} - {summary of changes}"
    - Create git tag: v{version}
    - Push to origin with tags
 
-4. **Publish to npm**:
+5. **Publish to npm**:
    - Run `npm publish --access public`
 
-5. **Report results**:
+6. **Report results**:
    - Show the published version
    - Show npm package URL: https://www.npmjs.com/package/@prosoftsolutions/platform-infra
