@@ -59,7 +59,7 @@ export class PlatformStack extends cdk.Stack {
 
     // Output warning about manual DNS configuration required
     cdk.Annotations.of(this).addWarning(
-      `⚠️  MANUAL ACTION REQUIRED: Update domain registrar name servers for '${domainName}' ` +
+      `⚠️  MANUAL ACTION MAY REQUIRED: Update domain registrar name servers for '${domainName}' ` +
         "to point to Route53 hosted zone (see NameServers output). " +
         "Certificate validation and website will NOT work until this is complete."
     );
