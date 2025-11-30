@@ -38,7 +38,11 @@ function copyDir(src, dest) {
     if (entry.isDirectory()) {
       copyDir(srcPath, destPath);
     } else {
-      fs.copyFileSync(srcPath, destPath);
+      if (fs.existsSync(destPath)) {
+        console.log(`Skipping existing file: ${destPath}`);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
     }
   }
 }
